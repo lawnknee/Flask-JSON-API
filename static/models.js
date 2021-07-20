@@ -32,7 +32,7 @@ class Cupcake {
 
   /** Takes in a cupcakeId.
    *  Deletes that cupcake from the database.
-   *  What am i returning?
+   *  Returns {message="Deleted"} in raw response data.
   */
   static async deleteCupcake(cupcakeId) {
     return await axios.delete(`${BASE_URL}/cupcakes/${cupcakeId}`);
