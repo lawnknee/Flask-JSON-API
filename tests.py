@@ -49,6 +49,8 @@ class CupcakeViewsTestCase(TestCase):
         db.session.rollback()
 
     def test_list_cupcakes(self):
+        """Tests cupcakes list."""
+        
         with app.test_client() as client:
             resp = client.get("/api/cupcakes")
 
@@ -68,6 +70,8 @@ class CupcakeViewsTestCase(TestCase):
             })
 
     def test_get_cupcake(self):
+        """Tests getting a specific cupcake."""
+        
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.get(url)
@@ -83,8 +87,19 @@ class CupcakeViewsTestCase(TestCase):
                     "image": "http://test.com/cupcake.jpg"
                 }
             })
+    
+    def test_get_invalid_cupcake(self):
+        """Tests getting an invalid cupcake id."""
+        
+        with app.test_client() as client:
+            url = "/api/cupcakes/1000"
+            resp = client.get(url)
+            
+            self.assertEqual(resp.status_code, 404)
 
     def test_create_cupcake(self):
+        """Tests creating a new cupcake."""
+        
         with app.test_client() as client:
             url = "/api/cupcakes"
             resp = client.post(url, json=CUPCAKE_DATA_2)
@@ -105,13 +120,16 @@ class CupcakeViewsTestCase(TestCase):
                     "image": "http://test.com/cupcake2.jpg"
                 }
             })
-
+            # what would be in the query for all cupcakes
+            # we had 1 cupcake, if we add a new one, our count should now be 2
             self.assertEqual(Cupcake.query.count(), 2)
 
     def test_update_cupcake(self):
+        """Tests updating a specific cupcake."""
+        
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
-            resp = client.patch(url, json=CUPCAKE_DATA)
+            resp = client.patch(url, json=CUPCAKE_DATA_2)
             
             self.assertEqual(resp.status_code, 200)
             
@@ -119,17 +137,28 @@ class CupcakeViewsTestCase(TestCase):
             
             self.assertEqual(data, {
                 "cupcake":{
-                    "id": self.cupcake.id,
-                    "flavor": "TestFlavor",
-                    "size": "TestSize",
-                    "rating": 5,
-                    "image": "http://test.com/cupcake.jpg"
+                    "id": self.cupcake.id, 
+                    "flavor": "TestFlavor2",
+                    "size": "TestSize2",
+                    "rating": 10,
+                    "image": "http://test.com/cupcake2.jpg"
                 }
             })
             
             self.assertEqual(Cupcake.query.count(), 1)
             
+    def test_update_missing_cupcake(self):
+        """Tests updating an invalid cupcake id."""
+        
+        with app.test_client() as client:
+            url = "/api/cupcakes/1000"
+            resp = client.patch(url, json=CUPCAKE_DATA_2)
+
+            self.assertEqual(resp.status_code, 404)
+            
     def test_delete_cupcake(self):
+        """Tests deleting a specific cupcake."""
+        
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.delete(url)
@@ -140,3 +169,12 @@ class CupcakeViewsTestCase(TestCase):
             
             self.assertEqual({"message": "Deleted"}, data)
             self.assertEqual(Cupcake.query.count(), 0)
+            
+    def test_delete_missing_cupcake(self):
+        """Tests deleting an invalid cupcake id."""
+        
+        with app.test_client() as client:
+            url = "/api/cupcakes/1000"
+            resp = client.delete(url)
+            
+            self.assertEqual(resp.status_code, 404)
